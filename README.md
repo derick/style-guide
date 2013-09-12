@@ -1,10 +1,7 @@
 # Prelude
 
-> You will find only what you bring in. <br/>
-> -- Master Yoda
-
 The goal of this guide is to present a set of best practices and style
-prescriptions for Ruby on Rails based on SciMed Solutions' years
+prescriptions for Ruby on Rails based on years
 of development experience.
 
 You can generate a PDF or an HTML copy of this guide using
@@ -34,7 +31,7 @@ You can generate a PDF or an HTML copy of this guide using
 
 ## Routing
 
-* Try to avoid adding non RESTful routes to a resource.
+* Try to avoid adding non-RESTful routes to a resource.
 * Favor `resources`, `member`, and `collection` routes over `get`, `post`, `patch` matchers.
 * If you need to define multiple `member/collection` routes use the
   alternative block syntax.
@@ -53,7 +50,7 @@ You can generate a PDF or an HTML copy of this guide using
     end
     ```
 
-* Use nested routes to express better the relationship between
+* Use nested routes to better express the relationship between
   ActiveRecord models.
 * Avoid more than 1 level of resource nesting.
 
@@ -84,13 +81,13 @@ You can generate a PDF or an HTML copy of this guide using
     ```
 ## Controllers
 
-* Try to avoid adding non RESTful actions to a resource.
-* Storing anything in session is discouraged.
+* Minimize use of non-RESTful actions in a resource.
+* Minimize session storage.
 * Keep the controllers skeletal - they should only retrieve data for the
   view layer and shouldn't contain any business logic (all the
   business logic should naturally reside in the model).
-* Place non RESTful actions above RESTful actions in the controller. If a
-  controller has more than a few non default actions, there is a high
+* Place non-RESTful actions above RESTful actions in the controller. If a
+  controller has more than a few non-default actions, there is a high
   probability that another resource (and controller) is required.
 
   ```Ruby
@@ -109,30 +106,29 @@ You can generate a PDF or an HTML copy of this guide using
 * Each controller action should (ideally) invoke only one method other
   than an initial find or new.
 * Share no more than two instance variables between a controller and a view.
-* Remove generated `respond_to` blocks from controller actions unless needed.
 * Remove generated comments on Controller actions.
-* Structure Controller content [in the following order](samples/controller.md):
-  * Module extend/include
-  * Third party macros (devise, paperclip)
-  * `*_filter` or `*_action` macros in chronological order.
-  * Nondefault controller actions
-  * Default controller actions
-  * Private methods
+* Structure Controller content [in the following order](samples/controller.md)
+	1. Module extend/include
+	2. Third party macros (devise, paperclip)
+	3. `*_filter` or `*_action` macros in chronological order.
+	4. Non-default controller actions
+	5. Default controller actions
+	6. Private methods
 
 ## Models
 
 * Using non-ActiveRecord models is encouraged.
-* Do not place non-ActiveRecord models in lib, place them in the models
-  directory. The lib directory should only be used for code that is not
-  within the applications domain model. Consider placing all other code
-  in the models or initializers directory. Furthermore, consider vendoring
+* Do not place non-ActiveRecord models in lib/, place them in models/
+  .  lib/ should only be used for code that is not
+  within the application's domain model. Consider placing all other code
+  in models/ or initializers/. Furthermore, consider vendoring
   any code placed in the lib directory as a gem.
-* *** TODO: add directory naming conventions to group models, since there can be
+* *** TODO: add directory naming conventions for Rails 4 to group models, since there can be 
   several files in the models directory.
 * Name the models with meaningful, succinct names without
   abbreviations. Known acronyms are acceptable.
 * Do not camelCase acronyms in class names. Ruby has built-in support for
-  upcased class names.
+  UPCASED class names (or partial names).
   ```Ruby
   # BAD
   class HttpInterface
@@ -149,22 +145,25 @@ You can generate a PDF or an HTML copy of this guide using
 * Avoid adding callbacks in favor of [an object decorator](samples/callback.md).
 * Avoid adding callbacks if they are modifying other models.
 * Group macro-style methods (`has_many`, `validates`, etc) in the
-  beginning of the class definition.
-* Consider using a methods instead of constants. Methods are easier
-  to stub and test. Methods can also be marked as private/protected.
+  beginning of the class definition [in the prescribed order TODO](samples/callback.md).
+* Consider using a methods instead of constants. 
+	* Methods are easier to stub and test. 
+	* Methods can also be marked as private/protected. 
+	* [Do we need constants?](http://devblog.avdi.org/2011/08/18/do-we-need-constants/)
 * Structure model content [in the following order](samples/model.md):
-  * Module extend/include
-  * set_table_name, set_primary_key, default_scope
-  * Third party macros (devise, paperclip)
-  * Constants
-  * attr_accessible
-  * Callbacks in chronological order.
-  * validate then validates macros in alphabetical order
-  * attr_accesor and delegate macros
-  * associations in alphabetical order
-  * accepts_nested_attributes_for
-  * scopes
-  * Public then private methods
+	1. Module extend/include
+	2. set_table_name, set_primary_key, default_scope
+	3. Third party macros (devise, paperclip)
+	4. Constants
+	5. attr_accessible
+	6. Callbacks in chronological order
+	7. validate then validates macros in alphabetical order
+	8. attr_accesor and delegate macros
+	9. associations in alphabetical order
+	10. accepts_nested_attributes_for
+	11. scopes
+	12. Public then private methods
+
 * Use of `class << self` is discouraged in ActiveRecord models.
 * Use of `has_and_belongs_to_many` is strongly discouraged.  Use `has_many :through`
   instead. Using `has_many :through` allows additional attributes and validations
@@ -188,6 +187,7 @@ some regular expression mapping, create a custom validator file.
     end
 
     # good
+    # app/models/validators/email_validator.rb
     class EmailValidator < ActiveModel::EachValidator
       def validate_each(record, attribute, value)
         record.errors[attribute] << 'is not a valid email' unless value =~ /@/i
@@ -229,8 +229,7 @@ some regular expression mapping, create a custom validator file.
       scope :with_orders, -> { joins(:orders).select('distinct(users.id)') }
     end
     ```
-* In Rails 3 and below, beware of the behavior of the `update_attribute` method. It doesn't
-  run the model validations (unlike `update_attributes`) and could easily corrupt the model state.
+* In Rails 3 and below, beware of the behavior of the `update_attribute` method. It doesn't run the model validations (unlike `update_attributes`) and could easily corrupt the model state.
 
 ## Migrations
 
@@ -251,7 +250,7 @@ some regular expression mapping, create a custom validator file.
 
 * Never call the model layer directly from a view.
 * Never make complex formatting in the views, export the formatting to
-  a method in the view helper or the model.
+  a method in the view helper, or the model, or more than likely a decorator.
 * Avoid using DRY principles to reduce duplication of code that is visually
   the same, rather than essentially the same. Code should not be made DRY if
   the business motivation behind duplicated code differs between cases. Please see
@@ -316,11 +315,11 @@ some regular expression mapping, create a custom validator file.
 
 ## Bundler
 * Remove default comments
-* Versioning is discouraged unless a specific version of the gem is required.
-* **Do not** run `bundle update` unless for a specific gem.
+* Versioning is discouraged unless a specific version of the gem is required
+* **Do not** run `bundle update` unless for a specific gem
 * Structure Gemfile content [in the following order](samples/gemfile.md):
-  * source
-  * Nonstandard modifications
-  * Default Rails gems (listed in default order)
-  * Nondefault gems and gem groups (listed alphabetically)
-  * development, production, and test groups (listed alphabetically)
+	1. source
+	2. non-standard modifications
+	3. default Rails gems (listed in default order)
+	4. non-default gems and gem groups (listed alphabetically)
+	5. development, production, and test groups (listed alphabetically)
