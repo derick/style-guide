@@ -6,12 +6,12 @@ class User < ActiveRecord::Base
   set_table_name :people
   set_primary_key :uid
 
-  default_scope { where(active: true) }
+  default_scope { where(active: true) } # DISCOURAGED
 
   has_attachment :document, resize_to_fit: true
   can_login, memorable: true
 
-  GENDERS = %w(male female)
+  GENDERS = %w(male female) # DISCOURAGED - prefer methods instead
 
   attr_accessible :login, :first_name, :last_name, :email, :password
 
